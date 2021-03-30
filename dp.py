@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 # =========================数据定义开始============================
 # 三维列表，存放整个文件各组数据价值的列表，该列表分为若干子列表，每个子列表用于存储一组价值数据，每个子列表的数据又按照三个一组分为若干个列表
 global profit
 profit = []
-# 三维列表，存放整个文件各组数据重量的列表，同profit
+# 三维列表，存\放整个文件各组数据重量的列表，同profit
 global weight
 weight = []
 # 三维列表，存放整个文件各组数据价值-重量-价值重量比的列表，该列表分为若干子列表，每个子列表用于存储一组价值-重量-价值重量比数据,每个子列表
@@ -18,6 +19,10 @@ profitData = []
 # 存放重量初始数据，即刚读入并且仅对结尾做了处理的字符串
 global weightData
 weightData = []
+global endMax
+endMax = []
+global pathList
+pathList = []
 # =========================数据定义结束============================
 
 
@@ -92,6 +97,8 @@ def getData():
         profit.append(group_P_List)
         weight.append(group_W_List)
         prowei.append(group_PW_List)
+        global flagList
+        flagList = profit
     return 'ok'
 # ==========================文件读取和处理函数结束========================
 
@@ -115,7 +122,7 @@ def show(n):
         plt.scatter(int(pointXList[point]), int(pointYList[point]), s=area, color=color)
     plt.show()
     # 保存散点图
-    plt.savefig('1.png')
+    plt.savefig('3.png')
 # ===========================绘制散点图函数结束===========================
 
 # ============================非递增排序函数开始===========================
@@ -125,20 +132,36 @@ def sort(n):
     print(prowei[n])
 # ============================非递增排序函数结束===========================
 
-def huisu():
-    pass
-
-
+def huisu(num, maxWeight, x, y, totalP, totalW):
+    if y != 3:
+        totalP = totalP + profit[num][x][y]
+        totalW = totalW + weight[num][x][y]
+    # 总价值和总重量
+    if totalW > maxWeight:
+        #print(totalP)
+        return 0
+    if x == len(profit[num])-1:
+        endMax.append(totalP)
+        return 0
+    else:
+        for i in range(4):
+            huisu(num,maxWeight,x + 1,i,totalP,totalW)
+    return 0
+def path(position,num):
+    for i in range(len(profit[num])):
+            pathList.append(position%4)
+            print(position%4)
+            position = position / 4
+    return
 def dp():
     pass
-
-
 if __name__ == '__main__':
     getData()
     # 列表中包含若干个子列表，每个子列表包含一组数据的价值信息，每个子列表又包含若干个三元组列表，三元组列表记录了记录了该组数据每个项集
     print('数据读入完成！')
     print('价值信息：')
-    print(profit)
+    for i in profit[0]:
+        print(i)
     # 同价值信息，用于记录重量信息
     print('重量信息：')
     print(weight)
@@ -157,10 +180,25 @@ if __name__ == '__main__':
             continue
         elif x == 3:
             n = int(input('请选择算法\n1、回溯法\n2、动态规划算法\n'))
+            num = int(input('请输入要求解第几组数据'))
+            maxWeight = int(input('请输入背包容纳的最大重量'))
             if n == 1:
-                huisu()
+                profit[num-1] = [[0,0,0]]+profit[num-1]
+                weight[num - 1] = [[0, 0, 0]] + weight[num - 1]
+                time1 = time.time()
+                huisu(num-1,maxWeight,0,0,0,0)
+                time2 = time.time()
+                print(time2-time1)
+                # endMax.sort(reverse=True)
+                print(endMax[0])
+                xx = 0
+                mxx = 0
+                for item in range(len(endMax)):
+                    if endMax[item]>mxx:
+                        xx = item
+                path(xx, num - 1)
             elif n == 2:
-                dp()
+                dp(weight)
         else:
             print('输入有误，请重新输入！')
             continue
