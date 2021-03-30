@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import openpyxl
 
 # =========================数据定义开始============================
 # 三维列表，存放整个文件各组数据价值的列表，该列表分为若干子列表，每个子列表用于存储一组价值数据，每个子列表的数据又按照三个一组分为若干个列表
 global profit
 profit = []
-# 三维列表，存\放整个文件各组数据重量的列表，同profit
+# 三维列表，存放整个文件各组数据重量的列表，同profit
 global weight
 weight = []
 # 三维列表，存放整个文件各组数据价值-重量-价值重量比的列表，该列表分为若干子列表，每个子列表用于存储一组价值-重量-价值重量比数据,每个子列表
@@ -23,6 +24,10 @@ global endMax
 endMax = []
 global pathList
 pathList = []
+global endPath
+endPath = []
+
+
 # =========================数据定义结束============================
 
 
@@ -99,7 +104,9 @@ def getData():
         prowei.append(group_PW_List)
         global flagList
         flagList = profit
-    return 'ok'
+    return fileName
+
+
 # ==========================文件读取和处理函数结束========================
 
 # ===========================绘制散点图函数开始===========================
@@ -123,6 +130,8 @@ def show(n):
     plt.show()
     # 保存散点图
     plt.savefig('3.png')
+
+
 # ===========================绘制散点图函数结束===========================
 
 # ============================非递增排序函数开始===========================
@@ -130,33 +139,89 @@ def sort(n):
     # 将第n组数据按照第三项的价值重量比做非递增排序
     prowei[n].sort(key=lambda x: x[8], reverse=True)
     print(prowei[n])
+
+
 # ============================非递增排序函数结束===========================
 
-def huisu(num, maxWeight, x, y, totalP, totalW):
+# ============================回溯求解模块=================================
+# ==========num:待求解数据下标  maxWeight ：背包最大容量 x y totalP当前已经访问的节点总价值 total : 总重量
+def huisu(num, maxWeight, x, y, totalP, totalW): # 访问一个节点   x,y 计算当前价值
     if y != 3:
         totalP = totalP + profit[num][x][y]
         totalW = totalW + weight[num][x][y]
-    # 总价值和总重量
-    if totalW > maxWeight:
-        #print(totalP)
-        return 0
-    if x == len(profit[num])-1:
-        endMax.append(totalP)
+    if x == len(profit[num]) - 1:
+        # 总价值和总重量
+        if totalW > maxWeight:
+            # print(totalP)
+            pathList.append(totalP)
+            return 0
+        else:
+            endMax.append(totalP)
+            pathList.append(totalP)
         return 0
     else:
         for i in range(4):
-            huisu(num,maxWeight,x + 1,i,totalP,totalW)
+            huisu(num, maxWeight, x + 1, i, totalP, totalW)
     return 0
-def path(position,num):
+
+
+# ===============================回溯结束==================================
+
+# =============================打印路径模块====================================
+def path(position, num):
+    endMidPath = []
+    str1 = ''
     for i in range(len(profit[num])):
-            pathList.append(position%4)
-            print(position%4)
-            position = position / 4
-    return
-def dp():
-    pass
+        endMidPath.append(position % 4)
+        # print(position%4)
+        position = int(position / 4)
+    endMidPath.reverse()
+    for i in range(len(endMidPath)):
+        if i == 0:
+            str1 = str1 + '开始选择--->'
+            #print('从根节点开始')
+        elif endMidPath[i] != 3:
+            str1 = str1 + str(profit[num][i][endMidPath[i]]) + '--->'
+            #print('第' + str(i) + '个背包选择' + str(profit[num][i][endMidPath[i]]))
+        else:
+            str1 = str1 + '不做选择--->'
+            #print('第' + str(i) + '个背包不选任何元素')
+    print(str1.strip('--->'))
+    endPath.append(str1.strip('--->'))
+# =================================打印路径模块结束==============================
+
+def dp(num,maxWeight):
+    weightArr = []
+    profitArr = []
+    weightArr = weight[num]
+    profitArr = profit[num]
+    #存放价值
+    f = []
+    for i in range(maxWeight):
+        f.append(0)
+    for i in range(len(profitArr)):
+        for j in range(3):
+            f[]
+
+
+# =========================保存为txt=======================
+def saveTxt(fileName,num,maxWeight,maxValue,sunTime):
+    file = open('查询结果.txt','a')
+    file.write('文件名:\n'+fileName+'\n')
+    file.write('第几组数据:\n'+str(num)+'\n')
+    file.write('背包容量:\n'+str(maxWeight)+'\n')
+    file.write('求解的最大价值:\n'+str(maxValue)+'\n')
+    file.write('运行时间:\n'+str(sunTime)+'s\n')
+    file.write('解向量:\n')
+    for item in endPath:
+        file.write(item+'\n')
+    file.close()
+
+def saveExcel(fileName,num,maxWeight,maxValue,sunTime):
+    excel = openpyxl.load_workbook('查询结果.xlsx')
+
 if __name__ == '__main__':
-    getData()
+    fileName = getData()
     # 列表中包含若干个子列表，每个子列表包含一组数据的价值信息，每个子列表又包含若干个三元组列表，三元组列表记录了记录了该组数据每个项集
     print('数据读入完成！')
     print('价值信息：')
@@ -183,22 +248,28 @@ if __name__ == '__main__':
             num = int(input('请输入要求解第几组数据'))
             maxWeight = int(input('请输入背包容纳的最大重量'))
             if n == 1:
-                profit[num-1] = [[0,0,0]]+profit[num-1]
+                profit[num - 1] = [[0, 0, 0]] + profit[num - 1]
                 weight[num - 1] = [[0, 0, 0]] + weight[num - 1]
+                for i in profit[0]:
+                    print(i)
                 time1 = time.time()
-                huisu(num-1,maxWeight,0,0,0,0)
+                huisu(num - 1, maxWeight, 0, 0, 0, 0)
                 time2 = time.time()
-                print(time2-time1)
-                # endMax.sort(reverse=True)
-                print(endMax[0])
-                xx = 0
-                mxx = 0
-                for item in range(len(endMax)):
-                    if endMax[item]>mxx:
-                        xx = item
-                path(xx, num - 1)
+                endMax.sort(reverse=True)
+                print('最大价值：' + str(endMax[0]))
+                print('运行时间：'+str(time2 - time1)+'s')
+                for item in range(len(pathList)):
+                    if pathList[item] == endMax[0]:
+                        path(item, num - 1)
             elif n == 2:
-                dp(weight)
+                dp(num-1,maxWeight)
+            x = int(input('请选择：\n1.保存为txt\n2.保存为Excel\n3.不保存'))
+            if x == 1:
+                saveTxt(fileName,num,maxWeight,endMax[0],time2-time1)
+            elif x == 2:
+                saveExcel(fileName,num,maxWeight,endMax[0],time2-time1)
+            else:
+                pass
         else:
             print('输入有误，请重新输入！')
             continue
