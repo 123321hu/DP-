@@ -35,7 +35,7 @@ endPath = []
 def getData():
     # -------打开指定文件，读入数据-------
     fileName = str(input('请输入文件名'))
-    file = open(fileName, 'r')
+    file = open('../'+fileName, 'r')
     line = file.readline()
     while (line):
         # 读入一行数据
@@ -130,6 +130,7 @@ def show(n):
     plt.show()
     # 保存散点图
     plt.savefig('3.png')
+    plt.close()
 
 
 # ===========================绘制散点图函数结束===========================
@@ -195,18 +196,28 @@ def dp(num,maxWeight):
     profitArr = []
     weightArr = weight[num]
     profitArr = profit[num]
+    print(weightArr)
+    print(profitArr)
     #存放价值
     f = []
-    for i in range(maxWeight):
-        f.append(0)
+    f1 = []
+    for j in range(len(profitArr)):
+        for i in range(maxWeight+1):
+            f1.append(0)
+        f.append(f1)
+        f1 = []
+    print(len(profitArr))
     for i in range(len(profitArr)):
-        for j in range(3):
-            f[]
-
-
+        for j in range(maxWeight,-1,-1):
+            for k in range(4):
+                if k == 3:
+                    f[i][j] = max(f[i][j],f[i-1][j])
+                elif j >= weightArr[i][k]:
+                    f[i][j] = max(f[i][j],f[i-1][j-weightArr[i][k]]+profitArr[i][k])
+    print(f[len(profitArr)-1][maxWeight])
 # =========================保存为txt=======================
 def saveTxt(fileName,num,maxWeight,maxValue,sunTime):
-    file = open('查询结果.txt','a')
+    file = open('../查询结果.txt', 'a')
     file.write('文件名:\n'+fileName+'\n')
     file.write('第几组数据:\n'+str(num)+'\n')
     file.write('背包容量:\n'+str(maxWeight)+'\n')
@@ -262,7 +273,10 @@ if __name__ == '__main__':
                     if pathList[item] == endMax[0]:
                         path(item, num - 1)
             elif n == 2:
+                time1 = time.time()
                 dp(num-1,maxWeight)
+                time2 = time.time()
+                print(time2-time1)
             x = int(input('请选择：\n1.保存为txt\n2.保存为Excel\n3.不保存'))
             if x == 1:
                 saveTxt(fileName,num,maxWeight,endMax[0],time2-time1)
