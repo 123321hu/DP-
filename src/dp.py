@@ -130,7 +130,8 @@ def show(n):
 def sort(n):
     # 将第n组数据按照第三项的价值重量比做非递增排序
     prowei[n].sort(key=lambda x: x[8], reverse=True)
-    print(prowei[n])
+    for item in prowei[n]:
+        print(item)
 
 
 # ============================回溯求解模块=================================
@@ -192,8 +193,8 @@ def dp(num, maxWeight):
             for k in range(3):
                 if j >= weightArr[i][k]:
                     l[j] = max(l[j], l[j - weightArr[i][k]] + profitArr[i][k])
-    print(l[maxWeight])
-
+    print('最大价值：' + str(l[maxWeight]))
+    return str(l[maxWeight])
 
 # =========================保存为txt=======================
 def saveTxt(fileName, num, maxWeight, maxValue, sunTime):
@@ -251,16 +252,21 @@ if __name__ == '__main__':
                 for item in range(len(pathList)):
                     if pathList[item] == endMax[0]:
                         path(item, num - 1)
+                x = int(input('请选择：\n1.保存为txt\n2.不保存'))
+                if x == 1:
+                    saveTxt(fileName, num, maxWeight, endMax[0], time2 - time1)
+                else:
+                    pass
             elif n == 2:
                 time1 = time.time()
-                dp(num - 1, maxWeight)
+                maxNum = dp(num - 1, maxWeight)
                 time2 = time.time()
-                print(time2 - time1)
-            x = int(input('请选择：\n1.保存为txt\n2.不保存'))
-            if x == 1:
-                saveTxt(fileName, num, maxWeight, endMax[0], time2 - time1)
-            else:
-                pass
+                print('运行时间：' + str(time2 - time1) + 's')
+                x = int(input('请选择：\n1.保存为txt\n2.不保存'))
+                if x == 1:
+                    saveTxt(fileName, num, maxWeight, maxNum, time2 - time1)
+                else:
+                    pass
         else:
             print('输入有误，请重新输入！')
             continue
